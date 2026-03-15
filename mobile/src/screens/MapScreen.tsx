@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, ActivityIndicator,
   TouchableOpacity, Dimensions
 } from 'react-native';
-import MapView, { Marker, Callout, Region } from 'react-native-maps';
+import MapView, { Marker, Callout, UrlTile, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { fetchNearbyDeals, fetchAllDeals } from '../lib/deals';
 
@@ -68,7 +68,15 @@ export default function MapScreen({ navigation }: any) {
         initialRegion={DEFAULT_REGION}
         showsUserLocation
         showsMyLocationButton
+        mapType="none"
       >
+        {/* OpenStreetMap Tiles */}
+        <UrlTile
+          urlTemplate="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+          maximumZ={19}
+          flipY={false}
+          tileSize={256}
+        />
         {locations.map((item, i) => (
           <Marker
             key={`${item.deal_id}-${item.location_id}-${i}`}

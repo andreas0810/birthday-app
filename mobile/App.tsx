@@ -5,17 +5,21 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Text, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import OnboardingScreen from './src/screens/OnboardingScreen';
-import ListScreen       from './src/screens/ListScreen';
-import MapScreen        from './src/screens/MapScreen';
-import SavedScreen      from './src/screens/SavedScreen';
-import DealDetailScreen from './src/screens/DealDetailScreen';
+import OnboardingScreen  from './src/screens/OnboardingScreen';
+import ListScreen        from './src/screens/ListScreen';
+import MapScreen         from './src/screens/MapScreen';
+import SavedScreen       from './src/screens/SavedScreen';
+import PersonsScreen     from './src/screens/PersonsScreen';
+import MoreScreen        from './src/screens/MoreScreen';
+import DealDetailScreen  from './src/screens/DealDetailScreen';
+
+import { registerForPushNotifications, checkForNewDeals } from './src/lib/notifications';
 
 const Tab   = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function TabIcon({ icon, focused }: { icon: string; focused: boolean }) {
-  return <Text style={{ fontSize: 22, opacity: focused ? 1 : 0.45 }}>{icon}</Text>;
+  return <Text style={{ fontSize: 22, opacity: focused ? 1 : 0.4 }}>{icon}</Text>;
 }
 
 function MainTabs() {
@@ -35,8 +39,8 @@ function MainTabs() {
           height: 64,
         },
         tabBarActiveTintColor: '#6C63FF',
-        tabBarInactiveTintColor: '#aaa',
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600', marginTop: 2 },
+        tabBarInactiveTintColor: '#bbb',
+        tabBarLabelStyle: { fontSize: 10, fontWeight: '600', marginTop: 2 },
       }}
     >
       <Tab.Screen
@@ -56,11 +60,27 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
+        name="Personen"
+        component={PersonsScreen}
+        options={{
+          tabBarIcon: ({ focused }) => <TabIcon icon="👥" focused={focused} />,
+          tabBarLabel: 'Personen',
+        }}
+      />
+      <Tab.Screen
         name="Gespeichert"
         component={SavedScreen}
         options={{
           tabBarIcon: ({ focused }) => <TabIcon icon="❤️" focused={focused} />,
           tabBarLabel: 'Gespeichert',
+        }}
+      />
+      <Tab.Screen
+        name="Mehr"
+        component={MoreScreen}
+        options={{
+          tabBarIcon: ({ focused }) => <TabIcon icon="☕" focused={focused} />,
+          tabBarLabel: 'Mehr',
         }}
       />
     </Tab.Navigator>
@@ -76,12 +96,16 @@ export default function App() {
     });
   }, []);
 
-  // Splash: warte auf AsyncStorage
+  useEffect(() => {
+    // Push Notifications + neue Deals prüfen
+    registerForPushNotifications().catch(console.error);
+    checkForNewDeals().catch(console.error);
+  }, []);
+
   if (hasOnboarded === null) {
     return <View style={{ flex: 1, backgroundColor: '#F8F9FA' }} />;
   }
 
-  // Onboarding: noch kein Geburtstag gespeichert
   if (!hasOnboarded) {
     return <OnboardingScreen onComplete={() => setHasOnboarded(true)} />;
   }
