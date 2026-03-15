@@ -1,0 +1,129 @@
+{
+  "businesses": [
+    {
+      "id": "biz-starbucks",
+      "name": "Starbucks",
+      "category_id": "cat-02",
+      "logo_url": "https://upload.wikimedia.org/wikipedia/en/d/d3/Starbucks_Corporation_Logo_2011.svg",
+      "website": "https://www.starbucks.de",
+      "is_chain": true,
+      "verified": true
+    },
+    {
+      "id": "biz-mcdonalds",
+      "name": "McDonald's",
+      "category_id": "cat-01",
+      "logo_url": "https://upload.wikimedia.org/wikipedia/commons/3/36/McDonald%27s_Golden_Arches.svg",
+      "website": "https://www.mcdonalds.com/de",
+      "is_chain": true,
+      "verified": true
+    },
+    {
+      "id": "biz-cinemaxx",
+      "name": "CinemaxX",
+      "category_id": "cat-07",
+      "website": "https://www.cinemaxx.de",
+      "is_chain": true,
+      "verified": true
+    },
+    {
+      "id": "biz-hairfree",
+      "name": "hairfree",
+      "category_id": "cat-05",
+      "website": "https://www.hairfree.de",
+      "is_chain": true,
+      "verified": false
+    },
+    {
+      "id": "biz-subway",
+      "name": "Subway",
+      "category_id": "cat-01",
+      "website": "https://www.subway.com/de-DE",
+      "is_chain": true,
+      "verified": true
+    },
+    {
+      "id": "biz-basiCo",
+      "name": "BasiCo",
+      "category_id": "cat-04",
+      "website": "https://www.basico.de",
+      "is_chain": true,
+      "verified": false
+    }
+  ],
+
+  "deals": [
+    {
+      "id": "deal-001",
+      "business_id": "biz-starbucks",
+      "title": "Gratis Getränk deiner Wahl",
+      "description": "An deinem Geburtstag erhältst du ein Gratisgetränk in beliebiger Größe – als Mitglied des Starbucks Rewards Programms.",
+      "deal_type": "free_item",
+      "validity_type": "birthday_only",
+      "proof_required": "loyalty_card",
+      "redemption_url": "https://www.starbucks.de/rewards",
+      "terms": "Nur für Starbucks Rewards Mitglieder. Registrierung erforderlich.",
+      "applies_to_all_locations": true,
+      "active": true,
+      "verified": true,
+      "source_url": "https://www.starbucks.de/rewards"
+    },
+    {
+      "id": "deal-002",
+      "business_id": "biz-mcdonalds",
+      "title": "Gratis Dessert per App",
+      "description": "Mit der McDonald's App erhältst du am Geburtstag ein gratis Dessert (z.B. McSundae oder Apfeltasche).",
+      "deal_type": "free_item",
+      "validity_type": "birthday_only",
+      "proof_required": "app_screenshot",
+      "terms": "Nur via McDonald's App einlösbar. Angebot kann variieren.",
+      "applies_to_all_locations": true,
+      "active": true,
+      "verified": true,
+      "source_url": "https://www.mcdonalds.com/de/de-de/mcdapp.html"
+    },
+    {
+      "id": "deal-003",
+      "business_id": "biz-cinemaxx",
+      "title": "Gratis Kinoticket am Geburtstag",
+      "description": "CinemaxX-Club Mitglieder erhalten an ihrem Geburtstag ein kostenloses Kinoticket (2D, Standardsitz).",
+      "deal_type": "free_entry",
+      "validity_type": "birthday_only",
+      "proof_required": "id_card",
+      "redemption_url": "https://www.cinemaxx.de/club",
+      "terms": "Nur für CinemaxX Club Mitglieder. Ausweis erforderlich.",
+      "applies_to_all_locations": true,
+      "active": true,
+      "verified": true
+    },
+    {
+      "id": "deal-004",
+      "business_id": "biz-subway",
+      "title": "Gratis Sub am Geburtstag",
+      "description": "Als Subway MyWay Rewards Mitglied bekommst du an deinem Geburtstag einen gratis 15cm Sub.",
+      "deal_type": "free_item",
+      "validity_type": "birthday_week",
+      "proof_required": "app_screenshot",
+      "terms": "Nur für MyWay Rewards Mitglieder. Gilt 1 Woche um den Geburtstag.",
+      "applies_to_all_locations": true,
+      "active": true,
+      "verified": false,
+      "source_url": "https://www.subway.com/de-DE/myway"
+    },
+    {
+      "id": "deal-005",
+      "business_id": "biz-hairfree",
+      "title": "20% Rabatt im Geburtstagsmonat",
+      "description": "hairfree Institut-Kunden erhalten im Geburtstagsmonat 20% auf eine Behandlung.",
+      "deal_type": "percent_discount",
+      "discount_value": 20,
+      "discount_unit": "percent",
+      "validity_type": "birthday_month",
+      "proof_required": "id_card",
+      "terms": "Nur für bestehende Kunden. Einmal einlösbar.",
+      "applies_to_all_locations": true,
+      "active": true,
+      "verified": false
+    }
+  ]
+}

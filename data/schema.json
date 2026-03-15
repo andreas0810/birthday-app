@@ -1,73 +1,131 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Birthday App Schema",
+  "title": "Birthday Deals App – Database Schema",
   "version": "1.0.0",
-  "definitions": {
-    "Person": {
-      "type": "object",
-      "required": ["id", "name", "birthday"],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Eindeutige ID (UUID)"
-        },
-        "name": {
-          "type": "string",
-          "description": "Vollständiger Name"
-        },
-        "birthday": {
-          "type": "object",
-          "required": ["day", "month"],
-          "properties": {
-            "day": { "type": "integer", "minimum": 1, "maximum": 31 },
-            "month": { "type": "integer", "minimum": 1, "maximum": 12 },
-            "year": { "type": "integer", "description": "Optional – Geburtsjahr" }
-          }
-        },
-        "photo": {
-          "type": "string",
-          "description": "Lokaler Dateipfad oder URL zum Profilbild"
-        },
-        "groups": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Zugehörige Gruppen-IDs"
-        },
-        "notes": {
-          "type": "string",
-          "description": "Persönliche Notizen"
-        },
-        "reminderDays": {
-          "type": "array",
-          "items": { "type": "integer", "minimum": 0 },
-          "description": "Erinnerung X Tage vorher (z.B. [0, 1, 7])"
-        },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
+  "description": "Zeigt Gratis-Angebote & Rabatte an/um den eigenen Geburtstag, gefiltert nach Standort",
+
+  "tables": {
+
+    "users": {
+      "description": "App-Nutzer",
+      "columns": {
+        "id": { "type": "uuid", "primaryKey": true },
+        "birthday_day": { "type": "integer", "min": 1, "max": 31, "required": true },
+        "birthday_month": { "type": "integer", "min": 1, "max": 12, "required": true },
+        "display_name": { "type": "string", "nullable": true },
+        "location_lat": { "type": "float", "nullable": true, "description": "Letzter bekannter Standort" },
+        "location_lng": { "type": "float", "nullable": true },
+        "city": { "type": "string", "nullable": true },
+        "push_token": { "type": "string", "nullable": true, "description": "Expo Push Token" },
+        "notifications_enabled": { "type": "boolean", "default": true },
+        "created_at": { "type": "timestamp" }
       }
     },
-    "Group": {
-      "type": "object",
-      "required": ["id", "name"],
-      "properties": {
-        "id": { "type": "string" },
-        "name": { "type": "string", "description": "z.B. Familie, Freunde, Arbeit" },
-        "color": { "type": "string", "description": "Hex-Farbcode z.B. #FF5733" },
-        "icon": { "type": "string", "description": "Icon-Name oder Emoji" }
+
+    "businesses": {
+      "description": "Unternehmen / Läden die Geburtstags-Deals anbieten",
+      "columns": {
+        "id": { "type": "uuid", "primaryKey": true },
+        "name": { "type": "string", "required": true, "example": "Starbucks" },
+        "category_id": { "type": "uuid", "references": "categories.id" },
+        "logo_url": { "type": "string", "nullable": true },
+        "website": { "type": "string", "nullable": true },
+        "is_chain": { "type": "boolean", "default": false, "description": "Filialkette (Deal gilt überall)" },
+        "verified": { "type": "boolean", "default": false, "description": "Von uns verifiziert" },
+        "created_at": { "type": "timestamp" }
       }
     },
-    "Settings": {
-      "type": "object",
-      "properties": {
-        "defaultReminderDays": {
-          "type": "array",
-          "items": { "type": "integer" },
-          "default": [1, 7],
-          "description": "Standard-Erinnerungszeiten für neue Einträge"
+
+    "locations": {
+      "description": "Einzelne Filialen / Standorte eines Unternehmens",
+      "columns": {
+        "id": { "type": "uuid", "primaryKey": true },
+        "business_id": { "type": "uuid", "references": "businesses.id", "required": true },
+        "name": { "type": "string", "nullable": true, "description": "z.B. 'Starbucks Marienplatz'" },
+        "address": { "type": "string" },
+        "city": { "type": "string" },
+        "country": { "type": "string", "default": "DE" },
+        "lat": { "type": "float", "required": true },
+        "lng": { "type": "float", "required": true },
+        "phone": { "type": "string", "nullable": true },
+        "opening_hours": { "type": "jsonb", "nullable": true },
+        "active": { "type": "boolean", "default": true }
+      }
+    },
+
+    "deals": {
+      "description": "Geburtstags-Angebote (ein Deal kann für eine Kette oder einzelnen Standort gelten)",
+      "columns": {
+        "id": { "type": "uuid", "primaryKey": true },
+        "business_id": { "type": "uuid", "references": "businesses.id", "required": true },
+        "title": { "type": "string", "required": true, "example": "Gratis Getränk deiner Wahl" },
+        "description": { "type": "string" },
+        "deal_type": {
+          "type": "enum",
+          "values": ["free_item", "percent_discount", "fixed_discount", "free_service", "free_entry"],
+          "required": true
         },
-        "notificationsEnabled": { "type": "boolean", "default": true },
-        "language": { "type": "string", "default": "de" },
-        "theme": { "type": "string", "enum": ["light", "dark", "system"], "default": "system" }
+        "discount_value": { "type": "float", "nullable": true, "description": "z.B. 20 für 20% oder 5 für 5€" },
+        "discount_unit": { "type": "enum", "values": ["percent", "euro"], "nullable": true },
+        "validity_type": {
+          "type": "enum",
+          "values": ["birthday_only", "birthday_week", "birthday_month"],
+          "default": "birthday_only"
+        },
+        "proof_required": {
+          "type": "enum",
+          "values": ["id_card", "app_screenshot", "loyalty_card", "none"],
+          "default": "id_card"
+        },
+        "redemption_url": { "type": "string", "nullable": true, "description": "Link zum Einlösen / Coupon-Seite" },
+        "coupon_code": { "type": "string", "nullable": true },
+        "image_url": { "type": "string", "nullable": true },
+        "terms": { "type": "string", "nullable": true, "description": "Bedingungen (z.B. 'Mit Kauf eines weiteren')" },
+        "applies_to_all_locations": { "type": "boolean", "default": true },
+        "active": { "type": "boolean", "default": true },
+        "verified": { "type": "boolean", "default": false },
+        "source_url": { "type": "string", "nullable": true, "description": "Quelle des Deals" },
+        "created_at": { "type": "timestamp" },
+        "updated_at": { "type": "timestamp" }
+      }
+    },
+
+    "deal_locations": {
+      "description": "Verknüpfung Deal ↔ einzelne Filiale (wenn Deal nicht kettenübergreifend gilt)",
+      "columns": {
+        "deal_id": { "type": "uuid", "references": "deals.id" },
+        "location_id": { "type": "uuid", "references": "locations.id" }
+      }
+    },
+
+    "categories": {
+      "description": "Deal-Kategorien",
+      "columns": {
+        "id": { "type": "uuid", "primaryKey": true },
+        "name": { "type": "string", "required": true },
+        "icon": { "type": "string", "description": "Emoji oder Icon-Name" },
+        "color": { "type": "string", "description": "Hex-Farbe" }
+      }
+    },
+
+    "user_saved_deals": {
+      "description": "Vom Nutzer gespeicherte / favorisierte Deals",
+      "columns": {
+        "user_id": { "type": "uuid", "references": "users.id" },
+        "deal_id": { "type": "uuid", "references": "deals.id" },
+        "saved_at": { "type": "timestamp" }
+      }
+    },
+
+    "deal_reports": {
+      "description": "Community-Meldungen: Deal abgelaufen oder neu entdeckt",
+      "columns": {
+        "id": { "type": "uuid", "primaryKey": true },
+        "deal_id": { "type": "uuid", "references": "deals.id", "nullable": true },
+        "report_type": { "type": "enum", "values": ["expired", "new_deal", "wrong_info"] },
+        "message": { "type": "string", "nullable": true },
+        "business_name": { "type": "string", "nullable": true, "description": "Bei new_deal: Firmenname" },
+        "submitted_at": { "type": "timestamp" }
       }
     }
   }

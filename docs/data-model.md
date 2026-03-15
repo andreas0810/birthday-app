@@ -1,60 +1,116 @@
-# Datenmodell – Birthday App
+# Datenmodell – Birthday Deals App
 
-## Überblick
+## Konzept
 
-Die App arbeitet mit drei Kernentitäten:
-
-| Entität   | Beschreibung                              |
-|-----------|-------------------------------------------|
-| `Person`  | Kontakt mit Geburtstag und Erinnerungen   |
-| `Group`   | Kategorie (Familie, Freunde, Arbeit ...)  |
-| `Settings`| App-weite Einstellungen des Nutzers       |
+Die App zeigt Nutzern, welche **Gratis-Angebote und Rabatte** an ihrem Geburtstag in ihrer Nähe verfügbar sind.
 
 ---
 
-## Person
+## Entitäten
 
-| Feld            | Typ            | Pflicht | Beschreibung                          |
-|-----------------|----------------|---------|---------------------------------------|
-| `id`            | string (UUID)  | ✅      | Eindeutige ID                         |
-| `name`          | string         | ✅      | Vollständiger Name                    |
-| `birthday.day`  | integer 1–31   | ✅      | Geburtstag                            |
-| `birthday.month`| integer 1–12   | ✅      | Geburtsmonat                          |
-| `birthday.year` | integer        | ❌      | Geburtsjahr (optional, für Alter)     |
-| `photo`         | string         | ❌      | Pfad oder URL zum Profilbild          |
-| `groups`        | string[]       | ❌      | Liste von Gruppen-IDs                 |
-| `notes`         | string         | ❌      | Persönliche Notiz                     |
-| `reminderDays`  | integer[]      | ❌      | Erinnerung X Tage vorher, z.B. [0,7] |
-| `createdAt`     | ISO 8601       | ✅      | Erstellungsdatum                      |
-| `updatedAt`     | ISO 8601       | ✅      | Letztes Update                        |
+```
+users ──────────── user_saved_deals ──── deals
+                                          │
+businesses ──────────────────────────────┤
+     │                                    │
+locations ──── deal_locations ────────────┘
+     │
+categories
+```
 
 ---
 
-## Group
+## Tabellen
 
-| Feld    | Typ    | Pflicht | Beschreibung              |
-|---------|--------|---------|---------------------------|
-| `id`    | string | ✅      | Eindeutige ID             |
-| `name`  | string | ✅      | Gruppenname               |
-| `color` | string | ❌      | Hex-Farbe z.B. `#FF5733` |
-| `icon`  | string | ❌      | Emoji oder Icon-Name      |
+### `users`
+| Feld | Typ | Beschreibung |
+|---|---|---|
+| id | uuid | Primärschlüssel |
+| birthday_day | int | Tag (1–31) |
+| birthday_month | int | Monat (1–12) |
+| location_lat/lng | float | Letzter Standort |
+| city | string | Ort |
+| push_token | string | Expo Push Token für Notifications |
+
+### `businesses`
+| Feld | Typ | Beschreibung |
+|---|---|---|
+| id | uuid | Primärschlüssel |
+| name | string | Firmenname |
+| category_id | uuid | → categories |
+| is_chain | bool | Filialkette? |
+| verified | bool | Von uns geprüft? |
+
+### `locations`
+| Feld | Typ | Beschreibung |
+|---|---|---|
+| id | uuid | Primärschlüssel |
+| business_id | uuid | → businesses |
+| lat / lng | float | GPS-Koordinaten (für Umkreissuche) |
+| address / city | string | Adresse |
+
+### `deals`
+| Feld | Typ | Beschreibung |
+|---|---|---|
+| id | uuid | Primärschlüssel |
+| business_id | uuid | → businesses |
+| title | string | z.B. "Gratis Getränk" |
+| deal_type | enum | free_item / percent_discount / fixed_discount / free_service / free_entry |
+| discount_value | float | z.B. 20 (für 20%) |
+| validity_type | enum | birthday_only / birthday_week / birthday_month |
+| proof_required | enum | id_card / app_screenshot / loyalty_card / none |
+| applies_to_all_locations | bool | Gilt für alle Filialen der Kette? |
+| verified | bool | Deal bestätigt? |
+
+### `categories`
+Vordefiniert: Essen, Café, Shopping, Beauty, Sport, Kino, etc.
+
+### `user_saved_deals`
+M:N-Verknüpfung — Nutzer speichert / favorisiert Deals.
+
+### `deal_reports`
+Community meldet: Deal abgelaufen, neuer Deal, falsche Info.
 
 ---
 
-## Settings
+## Geo-Abfrage (Umkreissuche)
 
-| Feld                   | Typ       | Default    | Beschreibung                     |
-|------------------------|-----------|------------|----------------------------------|
-| `defaultReminderDays`  | integer[] | [1, 7]     | Standard-Erinnerungstage         |
-| `notificationsEnabled` | boolean   | true       | Push-Benachrichtigungen an/aus   |
-| `language`             | string    | "de"       | Sprache der App                  |
-| `theme`                | string    | "system"   | light / dark / system            |
+Supabase nutzt **PostGIS**. Abfrage aller Deals im Umkreis:
+
+```sql
+SELECT d.*, b.name, b.logo_url, l.address, l.city,
+  ST_Distance(
+    ST_MakePoint(l.lng, l.lat)::geography,
+    ST_MakePoint(:user_lng, :user_lat)::geography
+  ) AS distance_m
+FROM deals d
+JOIN businesses b ON d.business_id = b.id
+JOIN locations l ON l.business_id = b.id
+WHERE d.active = true
+  AND ST_DWithin(
+    ST_MakePoint(l.lng, l.lat)::geography,
+    ST_MakePoint(:user_lng, :user_lat)::geography,
+    :radius_meters
+  )
+ORDER BY distance_m ASC;
+```
 
 ---
 
-## Beispiel-Flow
+## Deal-Typen im Überblick
 
-1. Nutzer fügt Person hinzu → `Person`-Objekt wird erstellt
-2. Person wird einer Gruppe zugeordnet → `groups`-Array erhält Gruppen-ID
-3. App berechnet täglich: Wer hat in X Tagen Geburtstag?
-4. Push-Notification wird X Tage vorher gesendet (laut `reminderDays`)
+| Typ | Beispiel |
+|---|---|
+| `free_item` | Gratis Kaffee, Gratis Sub |
+| `free_entry` | Gratis Kinoticket |
+| `free_service` | Gratis Haarschnitt |
+| `percent_discount` | 20% auf alles |
+| `fixed_discount` | 5€ Rabatt |
+
+## Gültigkeitszeitraum
+
+| Wert | Bedeutung |
+|---|---|
+| `birthday_only` | Nur am genauen Geburtstag |
+| `birthday_week` | 3 Tage vorher bis 3 Tage nachher |
+| `birthday_month` | Gesamter Geburtstagsmonat |

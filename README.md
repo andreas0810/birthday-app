@@ -1,36 +1,65 @@
-# Birthday App
+# 🎂 Birthday Deals App
 
-Eine App zum Verwalten von Geburtstagen – für iOS und Android.
+Eine iOS & Android App, die zeigt: **Was bekomme ich an meinem Geburtstag gratis oder vergünstigt — in meiner Nähe?**
 
-## Ziel
+## Konzept
 
-Geburtstage von Kontakten speichern, verwalten und rechtzeitig daran erinnert werden.
+Nutzer hinterlegen ihren Geburtstag einmalig. Die App zeigt dann:
+- Alle verfügbaren Gratis-Angebote und Rabatte an ihrem Geburtstag
+- Gefiltert nach Standort / Umkreis
+- Als **Kartenansicht** (Map) und **Listenansicht** (Cards)
+- Mit direkt einlösbarem Coupon / QR-Code
+
+## Features (Ziel)
+
+### Nutzer-Seite
+- [ ] Onboarding: Geburtstagsangabe + Standortfreigabe
+- [ ] Übersichtsseite: Alle Deals in meiner Nähe (Kartenansicht + Liste)
+- [ ] Deal-Detailseite: Angebot, Einlösebedingungen, Karte zum Hinzeigen
+- [ ] Favoriten speichern
+- [ ] Push-Notification am Geburtstag
+
+### Admin/Daten-Seite
+- [ ] Datenbank aller Geburtstags-Deals (Restaurants, Shops, Beauty, ...)
+- [ ] Deals nach Kategorie, Stadt, Umkreis filterbar
+- [ ] Verifizierte und Community-gemeldete Deals
+
+## Tech Stack
+
+| Bereich     | Technologie                          |
+|-------------|--------------------------------------|
+| App         | **Expo / React Native** (iOS + Android) |
+| Karte       | React Native Maps (Google Maps)      |
+| Backend/DB  | **Supabase** (PostgreSQL + PostGIS für Geo-Queries) |
+| Auth        | Supabase Auth                        |
+| Push        | Expo Notifications                   |
+| Hosting     | Supabase (kostenlos bis zu einem Limit) |
 
 ## Projektstruktur
 
 ```
 birthday-app/
-├── data/                  # Datenschemas und Beispieldaten
-│   ├── schema.json        # Datenstruktur-Definition
-│   └── sample.json        # Beispieldaten
-├── docs/                  # Dokumentation
-│   └── data-model.md      # Datenmodell-Beschreibung
+├── app/                   # Expo/React Native App (kommt später)
+├── data/
+│   ├── schema.json        # Vollständiges Datenbankschema
+│   ├── sample-deals.json  # Beispiel-Deals für die DB
+│   └── categories.json    # Deal-Kategorien
+├── docs/
+│   ├── data-model.md      # Datenmodell-Beschreibung
+│   ├── architecture.md    # Systemarchitektur
+│   └── ui-concept.md      # UI/UX Konzept
 └── README.md
 ```
 
-## Datenmodell
+## Datenquellen (geplant)
 
-Siehe [`docs/data-model.md`](docs/data-model.md) für die vollständige Beschreibung.
+- Manuell gepflegte Datenbank bekannter Ketten (McDonald's, Starbucks, etc.)
+- Community-Beiträge (User melden neue Deals)
+- Später: automatisches Scraping / Partnerprogramm
 
-## Tech Stack
+## Nächste Schritte
 
-- App: React Native / Flutter (noch offen)
-- Daten: lokal (SQLite o.ä.) + optional Cloud-Sync
-
-## Status
-
-- [x] Datenmodell definiert
-- [ ] App-Framework gewählt
-- [ ] UI-Prototyp
-- [ ] iOS Build
-- [ ] Android Build
+1. Datenmodell finalisieren
+2. Supabase-Projekt anlegen
+3. Expo App Grundgerüst
+4. UI Design (Cards + Map)
