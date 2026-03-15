@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, SafeAreaView, Linking, Alert
 } from 'react-native';
 import { Deal } from '../types';
+import { saveDeal, unsaveDeal, isSaved } from '../lib/deals';
+import { getUserId } from '../lib/users';
 
 const DEAL_TYPE_LABELS: Record<string, string> = {
   free_item:        '🎁 Gratis Artikel',
@@ -29,6 +31,26 @@ const PROOF_LABELS: Record<string, string> = {
 export default function DealDetailScreen({ route, navigation }: any) {
   const { deal } = route.params as { deal: Deal };
   const business = deal.businesses;
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const userId = await getUserId();
+      if (userId) setSaved(await isSaved(userId, deal.id));
+    })();
+  }, [deal.id]);
+
+  async function toggleSave() {
+    const userId = await getUserId();
+    if (!userId) return;
+    if (saved) {
+      await unsaveDeal(userId, deal.id);
+      setSaved(false);
+    } else {
+      await saveDeal(userId, deal.id);
+      setSaved(true);
+    }
+  }
 
   const discountText =
     deal.deal_type === 'percent_discount' && deal.discount_value
@@ -59,6 +81,9 @@ export default function DealDetailScreen({ route, navigation }: any) {
               <Text style={styles.verifiedText}>Verifiziert</Text>
             </View>
           )}
+          <TouchableOpacity onPress={toggleSave} style={styles.saveBtn}>
+            <Text style={styles.saveBtnText}>{saved ? '❤️ Gespeichert' : '🤍 Speichern'}</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Titel & Rabatt */}
@@ -132,6 +157,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#2ECC7120', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 10,
   },
   verifiedText: { fontSize: 12, color: '#27AE60', fontWeight: '700' },
+  saveBtn: {
+    marginTop: 10, paddingHorizontal: 16, paddingVertical: 8,
+    borderRadius: 12, backgroundColor: '#F0EEFF',
+  },
+  saveBtnText: { fontSize: 14, fontWeight: '700', color: '#6C63FF' },
   section: { backgroundColor: '#fff', margin: 12, borderRadius: 16, padding: 20 },
   title: { fontSize: 22, fontWeight: '800', color: '#1A1A2E', marginBottom: 6 },
   discount: { fontSize: 18, fontWeight: '700', color: '#6C63FF', marginBottom: 10 },

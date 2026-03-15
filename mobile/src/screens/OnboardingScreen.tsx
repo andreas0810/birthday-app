@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity,
   SafeAreaView, Alert, ScrollView
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { saveUserProfile } from '../lib/users';
 
 interface Props {
   onComplete: () => void;
@@ -23,8 +23,13 @@ export default function OnboardingScreen({ onComplete }: Props) {
 
   async function finish() {
     if (!day || !month) return;
-    await AsyncStorage.setItem('birthday', JSON.stringify({ day, month }));
-    onComplete();
+    try {
+      await saveUserProfile(day, month);
+      onComplete();
+    } catch (e) {
+      console.error('Fehler beim Speichern:', e);
+      onComplete(); // trotzdem weiter, AsyncStorage wurde gesetzt
+    }
   }
 
   return (
