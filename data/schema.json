@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Birthday App Schema",
+  "version": "1.0.0",
+  "definitions": {
+    "Person": {
+      "type": "object",
+      "required": ["id", "name", "birthday"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Eindeutige ID (UUID)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Vollständiger Name"
+        },
+        "birthday": {
+          "type": "object",
+          "required": ["day", "month"],
+          "properties": {
+            "day": { "type": "integer", "minimum": 1, "maximum": 31 },
+            "month": { "type": "integer", "minimum": 1, "maximum": 12 },
+            "year": { "type": "integer", "description": "Optional – Geburtsjahr" }
+          }
+        },
+        "photo": {
+          "type": "string",
+          "description": "Lokaler Dateipfad oder URL zum Profilbild"
+        },
+        "groups": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Zugehörige Gruppen-IDs"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Persönliche Notizen"
+        },
+        "reminderDays": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0 },
+          "description": "Erinnerung X Tage vorher (z.B. [0, 1, 7])"
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Group": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string", "description": "z.B. Familie, Freunde, Arbeit" },
+        "color": { "type": "string", "description": "Hex-Farbcode z.B. #FF5733" },
+        "icon": { "type": "string", "description": "Icon-Name oder Emoji" }
+      }
+    },
+    "Settings": {
+      "type": "object",
+      "properties": {
+        "defaultReminderDays": {
+          "type": "array",
+          "items": { "type": "integer" },
+          "default": [1, 7],
+          "description": "Standard-Erinnerungszeiten für neue Einträge"
+        },
+        "notificationsEnabled": { "type": "boolean", "default": true },
+        "language": { "type": "string", "default": "de" },
+        "theme": { "type": "string", "enum": ["light", "dark", "system"], "default": "system" }
+      }
+    }
+  }
+}

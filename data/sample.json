@@ -1,0 +1,35 @@
+{
+  "persons": [
+    {
+      "id": "a1b2c3d4-0001",
+      "name": "Max Mustermann",
+      "birthday": { "day": 15, "month": 3, "year": 1985 },
+      "groups": ["grp-familie"],
+      "notes": "Mag Bücher und Wandern",
+      "reminderDays": [0, 1, 7],
+      "createdAt": "2026-01-01T10:00:00Z",
+      "updatedAt": "2026-01-01T10:00:00Z"
+    },
+    {
+      "id": "a1b2c3d4-0002",
+      "name": "Anna Schmidt",
+      "birthday": { "day": 24, "month": 12 },
+      "groups": ["grp-freunde"],
+      "notes": "",
+      "reminderDays": [1, 7],
+      "createdAt": "2026-01-01T10:00:00Z",
+      "updatedAt": "2026-01-01T10:00:00Z"
+    }
+  ],
+  "groups": [
+    { "id": "grp-familie", "name": "Familie", "color": "#E74C3C", "icon": "🏠" },
+    { "id": "grp-freunde", "name": "Freunde", "color": "#3498DB", "icon": "👥" },
+    { "id": "grp-arbeit",  "name": "Arbeit",  "color": "#2ECC71", "icon": "💼" }
+  ],
+  "settings": {
+    "defaultReminderDays": [1, 7],
+    "notificationsEnabled": true,
+    "language": "de",
+    "theme": "system"
+  }
+}
